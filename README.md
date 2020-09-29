@@ -484,3 +484,305 @@ $ program_a > output 2> error_file # Write output to a file (called 'output') an
 $ program_a > all_output 2>&1 # Send standard output (file descriptor 1) and standard error (file descriptor 2) to the same file (called 'all_output')
 $ program_a > output 2>/dev/null # Suppress errors entirely by piping them to a special file that ignores everything sent to it
 ````
+
+## Bash scripting
+
+### Shebang
+
+The shebang is a line at the start of a script that begins `#!`. The shebang says which executable, or interpreter, will be used to execute the script.
+
+The shebang at the top tells the user that the script must be executed using `zsh`:
+````
+#! /usr/bin/env zsh
+````
+
+### Variables
+
+You assign variables with [name]=[value] syntax.
+
+Variable names are case-sensitive, and valid characters are: a to z, 0 to 9, and the underscore (`_`). You access a variable's value by prefixing the variable name with `$`. You can also add braces (`${variable_name}`):
+
+````
+#! /usr/bin/env bash
+var=123
+echo $var # Access the variable using $
+echo $var + 3 # Variables are always strings
+echo "Variable = $var (double quotes)" # Variables are interpolated in double-quoted strings
+echo 'Variable = $var (single quotes)' # ...but not single-quoted strings
+echo "Variable = ${var}456" # Use curly brackets where necessary to bound the variable name
+````
+
+The dollar instructs the shell to look up a value associated with that name.:
+````
+var1=hello
+var2=var1 # Incorrect
+echo $var2 # prints var1
+var3=$var1 # Correct
+echo $var3 # prints hello
+````
+
+#### Scope
+
+`variable_two` is not accessible outside the function `set_variables`:
+````
+#! /usr/bin/env bash
+function set_variables {
+  variable_one=global
+  local variable_two=local
+}
+set_variables
+echo $variable_one # prints 'global'
+echo $variable_two # undefined
+````
+
+Subshells inherit the environment (i.e. variables) of their parent shell, but modifications to the environment within a pipe are not exported to the parent scope:
+````
+#! /usr/bin/env bash
+parent_var=parent
+ls | (echo $parent_var; subshell_var=child)
+echo $subshell_var # undefined
+````
+
+#### Read-only
+
+````
+readonly var=1
+var=2 # error
+````
+
+#### Environment variables
+
+Environment variables are processscoped variables, and can be set by using the `export` keyword before a variable definition.
+
+Environment variables are always strings, and by convention their names are all uppercase.
+
+#### Arrays
+
+````
+my_array[0]=This
+my_array[1]=is
+my_array[2]=an
+my_array[3]=array
+````
+
+You can also use the following shorthand syntax to define an array:
+````
+my_array=("This" "is" "an" "array")
+````
+
+After you have set any array variable, you access it as follows:
+````
+echo "First index: ${my_array[0]}" # First index: This
+echo "Third index: ${my_array[2]}" # Third index: an
+echo "All values: ${my_array[@]}" # All values: This is an array
+````
+
+### Conditionals
+
+````
+if BOOLEAN_EXPRESSION
+  then
+  echo 'Expression was true!'
+fi
+````
+````
+if EXPRESSION_A; then
+  echo 'Expression A was true!'
+elif EXPRESSION_B; then
+  echo 'Expression B was true!'
+elif EXPRESSION_C; then
+  echo 'Expression C was true!'
+else EXPRESSION_C
+  echo 'None of them were true'
+fi
+````
+
+Logical expressions are enclosed in square brackets:
+| Syntax          | Meaning                          |
+|-----------------|----------------------------------|
+| [[ -e file ]]   | True if 'file' exists            |
+| [[ -z string ]] | True if 'string' has length zero |
+| [[ A -gt B ]]   | True if A is greater than B      |
+| [[ A == B ]]    | True if A equals B               |
+| [[ A != B ]]    | True if A does not equal B       |
+
+There are some short-cuts you can take when writing small conditionals. These can help with
+readability:
+````
+[[ BOOLEAN_EXPRESSION ]] && ( echo 'The expression is True' )
+[[ BOOLEAN_EXPRESSION ]] || ( echo 'The expression is False' )
+````
+
+#### Bash brackets
+
+[Quick reference](https://www.assertnotmagic.com/2018/06/20/bash-brackets-quick-reference/)
+
+Summary of common brackets:
+| Brackets  | Meaning                                                 |
+|-----------|---------------------------------------------------------|
+| ( ... )   | Runs commands in a subshell                             |
+| (( ... )) | Perform integer arithmetic                              |
+| [ ... ]   | An alias for the test built-in command                  |
+| [[ ... ]] | Bash's expanded test command                            |
+| { ... }   | Function definitions, Grouping commands, text expansion |
+
+#### Loops
+
+````
+for i in {1..5}; do
+  echo $i
+done
+
+for file in $( ls ); do
+  echo $file
+done
+````
+
+The `$( command )` syntax is a **command substitution**. When run, the expression is replaced by the standard output returned by running the command inside the brackets. There's an alternative syntax using backticks: ` command `.
+
+````
+#! /usr/bin/env bash
+count=0
+while [ $count -lt 3 ]; do
+  echo $((count++))
+done
+
+until [ $count == -2 ]; do
+  echo $((count--))
+done
+````
+This prints: 0 1 2 3 2 1 0 -1
+
+#### Case statements
+
+````
+#! /usr/bin/env bash
+echo "Give me a letter: "
+read letter
+case $(echo "$letter" | tr '[:upper:]' '[:lower:]') in
+  b) echo "That's the second letter of the alphabet!";;
+  c) echo "And the third...";;
+  a | e | i | o | u) echo "That's a vowel";;
+  *) echo "I don't know that one";;
+esac
+````
+
+### Functions
+
+````
+function my_function {
+  commands...
+}
+my_identical_function() {
+  commands...
+}
+````
+
+You don't include function arguments in the function declaration. Instead you just access them when needed. Function arguments can be accessed via the variables `$1`, `$2` etc.
+
+You can also access all the arguments using the special variable `$@`:
+````
+function print_a_thing() {
+  echo $1
+}
+function print_all_the_things() {
+  for arg in $@; do
+    echo $arg
+  done
+}
+print_a_thing "dogs" "cats" "chickens" # Prints: dogs
+print_all_the_things "dogs" "cats" "chickens" # Prints: dogs cats chickens
+````
+
+### User input
+
+You can access these positional parameters passed to your script using the variables `$1`, `$2` etc. `$0` contains the name of your script.
+
+````
+./my_script.sh parameter_a parameter_b # $1 will contain the string "parameter_a" and $2 the string "parameter_b"
+````
+
+You can also use flags:
+````
+./my_script.sh -d 2 -r 5 -v
+````
+
+````
+#! /usr/bin/env bash
+duration=
+retries=
+verbose=
+while getopts "d:r:v" option; do
+  case "${option}" in
+    d)
+      duration=${OPTARG}
+      ;;
+    r)
+      retries=${OPTARG}
+      ;;
+    v)
+      verbose=1
+      ;;
+  esac
+done
+echo "Duration: $duration"
+echo "Retries: $retries"
+echo "Verbose: $verbose"
+````
+
+#### CLI interaction
+
+````
+#! /usr/bin/env bash
+echo "What's your name?"
+read name
+echo "Hi $name!"
+````
+
+### Exit codes
+
+Typically `0` means success and any non-zero value (`1`-`255`) means that something went wrong, and some further information should be written to `STDERR`.
+
+````
+if ! [[ -f $1 ]]; then
+  echo 'File not found!' >&2
+  exit 1
+else
+  echo 'File exists'
+  exit 0
+fi
+````
+
+### Shell options
+
+Options can be set or unset using `-o <flag-name>` or `+o <flag-name>` parameters respectively.
+
+- errexit (`-e`) - We can tell bash to immediately abort a script if it encounters an error by enabling 'errexit'.
+- verbose (`-v`) - This option instructs the shell to print every statement before running it.
+- xtrace (`-x`) - Similar to verbose but also performs variable substitution on the printed output.
+- noclobber (`-C`) - By default, redirecting command output to a file will override (aka 'clobber') any existing file content. Noclobber helps reduce the risk of overwriting existing data.
+
+### Cron jobs
+
+Syntax:
+`$ Minute(0-59) Hour(0-24) Day_of_month(1-31) Month(1-12) Day_of_week(0-6) Command_to_execute`
+
+````
+* * * * * <command-to-execute> # Run every minute
+*/5 * * * * <command-to-execute> # every 5th minute
+30 * * * * <command-to-execute> # every hour at minute 30
+0,5,10 * * * * <command-to-execute> # every hour at minute 0, 5 and 10
+0 */4 * * * <command-to-execute> # every 4 hours
+0 1 * * * <command-to-execute> # every day at 1 am
+0 0 * * 1-5 <command-to-execute> # every weekday
+````
+
+There are also some predefined schedule definitions:
+| Symbol                 | Description                                                | Equivalent |
+|------------------------|------------------------------------------------------------|------------|
+| @yearly (or @annually) | Run once a year at midnight of 1 January                   | 0 0 1 1 *  |
+| @monthly               | Run once a month at midnight of the first day of the month | 0 0 1 * *  |
+| @weekly                | Run once a week at midnight on Sunday morning              | 0 0 * * 0  |
+| @daily (or @midnight)  | Run once a day at midnight                                 | 0 0 * * *  |
+| @hourly                | Run once an hour at the beginning of the hour              | 0 * * * *  |
+| @reboot                | Run at startup                                             | N/A        |
