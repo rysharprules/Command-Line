@@ -1,5 +1,56 @@
 # Shell Commands
 
+- [Shell Commands](#shell-commands)
+  - [Shells](#shells)
+    - [Bourne Shell (`sh`)](#bourne-shell-sh)
+    - [Bash](#bash)
+    - [Z-Shell (`zsh`)](#z-shell-zsh)
+    - [Command prompt (`cmd.exe`)](#command-prompt-cmdexe)
+    - [PowerShell](#powershell)
+  - [Common tasks](#common-tasks)
+    - [Manage directories and files](#manage-directories-and-files)
+      - [Change directory](#change-directory)
+      - [Current directory](#current-directory)
+      - [Make directory](#make-directory)
+      - [Remove directory/files](#remove-directoryfiles)
+      - [Create files](#create-files)
+    - [Handling files](#handling-files)
+      - [Read content](#read-content)
+      - [Editing](#editing)
+        - [Nano (UNIX-like systems)](#nano-unix-like-systems)
+          - [Vi/Vim](#vivim)
+      - [File permissions](#file-permissions)
+        - [Unix](#unix)
+        - [Windows](#windows)
+    - [Making web requests](#making-web-requests)
+    - [Text search and manipulation](#text-search-and-manipulation)
+      - [`grep`](#grep)
+        - [Regex](#regex)
+      - [`sed`](#sed)
+      - [`awk`](#awk)
+      - [PowerShell](#powershell-1)
+    - [JSON processing](#json-processing)
+      - [`jq`](#jq)
+      - [PowerShell](#powershell-2)
+    - [Standard input, Output and Error](#standard-input-output-and-error)
+  - [Bash scripting](#bash-scripting)
+    - [Shebang](#shebang)
+    - [Variables](#variables)
+      - [Scope](#scope)
+      - [Read-only](#read-only)
+      - [Environment variables](#environment-variables)
+      - [Arrays](#arrays)
+    - [Conditionals](#conditionals)
+      - [Bash brackets](#bash-brackets)
+      - [Loops](#loops)
+      - [Case statements](#case-statements)
+    - [Functions](#functions)
+    - [User input](#user-input)
+      - [CLI interaction](#cli-interaction)
+    - [Exit codes](#exit-codes)
+    - [Shell options](#shell-options)
+    - [Cron jobs](#cron-jobs)
+
 ## Shells
 
 ### Bourne Shell (`sh`)
@@ -49,9 +100,9 @@ cd ./subdirectory
 ````
 Powershell (these do the same thing):
 ````
-$ Set-Location -Path ./subdirectory
-$ Set-Location ./subdirectory
-$ cd ./subdirectory
+Set-Location -Path ./subdirectory
+Set-Location ./subdirectory
+cd ./subdirectory
 ````
 
 #### Current directory
@@ -71,7 +122,7 @@ Path
 ````
 `Get-Location` returns an object of type `System.Management.Automation.PathInfo`
 
-##### Make directory
+#### Make directory
 
 Bash:
 ````
