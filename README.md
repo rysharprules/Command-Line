@@ -35,6 +35,8 @@
       - [`jq`](#jq)
       - [PowerShell](#powershell-2)
     - [Standard input, Output and Error](#standard-input-output-and-error)
+  - [Secure shell (SSH)](#secure-shell-ssh)
+    - [GitHub](#github)
   - [Bash scripting](#bash-scripting)
     - [Shebang](#shebang)
     - [Variables](#variables)
@@ -52,6 +54,7 @@
     - [Exit codes](#exit-codes)
     - [Shell options](#shell-options)
     - [Cron jobs](#cron-jobs)
+    - [`crontab`](#crontab)
 
 ## Shells
 
