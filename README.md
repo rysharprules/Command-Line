@@ -1,5 +1,7 @@
 # Shell Commands
 
+![title](title.png)
+
 - [Shell Commands](#shell-commands)
   - [Shells](#shells)
     - [Bourne Shell (`sh`)](#bourne-shell-sh)
@@ -511,6 +513,11 @@ $ cat data.json | jq '.rates | [keys[] as $k | {"\($k)" : .[$k] | .CAD}] | add' 
 }
 ````
 
+This final example, gets earthquake [data](https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson) from [USGS](https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php) and feed into `jq` with pipe. Feed into each pipe the data required, using String interpolation to format as a pipe delimeted list of earthquake details (longitude, latitude, location title, and magnitude), and finally saving into a new file.
+````
+curl https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson | jq -r '.features[] | [.geometry.coordinates, .properties.place, .properties.mag] | "\(.[0][1])|\(.[0][0])|\(.[1])|\(.[2])"' > thething
+````
+
 #### PowerShell
 
 PowerShell contains `ConvertFrom-Json` and `ConvertTo-Json` cmdlets to transform data between JSON and .NET object representations.
@@ -535,6 +542,38 @@ $ program_a > output 2> error_file # Write output to a file (called 'output') an
 $ program_a > all_output 2>&1 # Send standard output (file descriptor 1) and standard error (file descriptor 2) to the same file (called 'all_output')
 $ program_a > output 2>/dev/null # Suppress errors entirely by piping them to a special file that ignores everything sent to it
 ````
+
+## Secure shell (SSH)
+
+Connect to a server/virtual machine (VM) with: `ssh user@hostname`.
+
+To avoid requiring to enter a password every time, use a SSH key. Generate with:
+
+`ssh-keygen -t rsa -b 4096 -C "your_email@example.com"`
+
+This creates a new `ssh` key, using the provided email as a label.
+
+When you're prompted to "Enter a file in which to save the key," press Enter. This accepts the default file location(`C:\Users\Ryan\.ssh\id_rsa`).
+
+Three files will be present in .ssh directory:
+
+1. `id_rsa` - private key
+2. `id_rsa.pub` - public key
+3. `known_hosts` - populated as you connect to trusted servers
+
+The public key can be add to a servers authorized keys file:
+
+`vi ~/.ssh/authorized_keys`
+
+### GitHub
+
+Adding a SSH key on GitHub is done via these steps:
+
+1. Login
+2. Go to user Settings
+3. SSH and GPG keys
+4. New SSH key
+5. Add public key from `id_rsa.pub` file
 
 ## Bash scripting
 
@@ -837,3 +876,17 @@ There are also some predefined schedule definitions:
 | @daily (or @midnight)  | Run once a day at midnight                                 | 0 0 * * *  |
 | @hourly                | Run once an hour at the beginning of the hour              | 0 * * * *  |
 | @reboot                | Run at startup                                             | N/A        |
+
+### `crontab`
+
+`crontab` runs files on a schedule. See [manual here](https://man7.org/linux/man-pages/man1/crontab.1.html).
+
+Edit `crontab` with:
+
+`crontab -e`
+
+This will open `vi` for the `crontab` config. The syntax to add jobs is `<schedule> <file[s]>` as per the above. Files are separated with a `;`.
+
+See all `crontab` jobs with:
+
+`crontab -l`
