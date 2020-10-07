@@ -55,13 +55,44 @@ $GitPromptSettings.BranchColor.ForegroundColor = [ConsoleColor]::Blue
 $GitPromptSettings.AfterStatus.ForegroundColor = [ConsoleColor]::Blue
 
 # run ps as admin
-function admin { start-process PowerShell -verb runas }
+function admin { 
+	start-process PowerShell -verb runas
+	stop-process -Id $PID
+}
 
 # useful shortcuts for traversing directories
 function cd...  { cd ..\.. }
 function cd.... { cd ..\..\.. }
 
-function projects { cd 'C:\projects\' }
+function proj($a) {
+	If($a -eq "devops")
+	{
+		cd 'C:\projects\DevOps-Course-Starter\'
+	}
+	Else
+	{
+		cd 'C:\projects\'
+	}
+}
 
 # launch explorer in current folder
 function e { ii . }
+
+$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
+{
+	Write-Host "Running in admin mode."
+}
+Else
+{
+	$admin = Read-Host -Prompt "Type 'a' for admin mode"
+	If($admin -eq "a")
+	{
+		Write-Host "You selected admin mode."
+		admin
+	}
+	Else
+	{
+		Write-Host "Continuing in normal mode."
+	}
+}
